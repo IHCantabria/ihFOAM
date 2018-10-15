@@ -1,0 +1,44 @@
+INFO:
+  http://ihfoam.ihcantabria.com/
+  infoam@ihcantabria.com
+
+REFERENCES:
+* Solitary wave attenuation by vegetation patches.
+  Maza, M, Lara, J.L., & Losada, I.J. [2016]
+  Advances in Water Resources [Vol.98, pp. 159-172]
+  hhttps://doi.org/10.1016/j.advwatres.2016.10.021
+
+* Validation of OpenFOAM® for Oscillating Water Column three-dimensional modeling.
+  Iturrioz, A., Guanche, R., Lara, J.L., Vidal, C., & Losada, I.J. [2015]
+  Ocean Engineering [Vol. 107, pp. 222-237]
+  http://dx.doi.org/10.1016/j.oceaneng.2015.07.051
+
+* Tsunami wave interaction with mangrove forests: A 3-D numerical approach.
+  Maza, M, Lara, J.L., & Losada, I.J. [2015]
+  Coastal Engineering [Vol.98, pp. 33-54]
+  http://dx.doi.org/10.1016/j.oceaneng.2015.07.051
+
+* Three-dimensional numerical wave generation with moving boundaries.
+  Higuera, P., Lara, J.L. & Losada, I.J. [2015]
+  Coastal Engineering [Vol.101, pp. 35-47]
+  http://dx.doi.org/10.1016/j.oceaneng.2015.07.051
+
+* Three-Dimensional Interaction of Waves and Porous Coastal Structures using OpenFOAM®. Part II: Application.
+  Higuera, P., Lara, J.L. & Losada, I.J. [2014]
+  Coastal Engineering [Vol. 83, pp. 259-270]
+  http://dx.doi.org/10.1016/j.coastaleng.2013.09.002
+
+* Three-Dimensional Interaction of Waves and Porous Coastal Structures using OpenFOAM®. Part I: Formulation and Validation.
+  Higuera, P., Lara, J.L. & Losada, I.J. [2014]
+  Coastal Engineering [Vol. 83, pp. 243-258]
+  http://dx.doi.org/10.1016/j.coastaleng.2013.08.010
+
+* Simulating Coastal Engineering Processes with OpenFOAM®.
+  Higuera, P., Lara, J.L. & Losada, I.J. [2013]
+  Coastal Engineering [Vol. 71, pp. 119-134]
+  http://dx.doi.org/10.1016/j.coastaleng.2012.06.002
+
+* Realistic Wave Generation and Active Wave Absorption for Navier-­Stokes Models. Application to OpenFOAM®.
+  Higuera, P., Lara, J.L. & Losada, I.J. [2013]
+  Coastal Engineering [Vol. 71, pp. 102-118]
+  http://dx.doi.org/10.1016/j.coastaleng.2012.07.002

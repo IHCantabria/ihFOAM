@@ -1,0 +1,271 @@
+#include <stdio.h>
+#include <unistd.h>
+#include <errno.h>
+#include "SquareMatrix.H"
+#include "vector.H"
+#include "Matrix.H"
+
+#include "mpi.h"
+
+label nn=0;
+label nn3=0;
+
+label nn2=0;
+label nn4=0;
+
+char cwd[1024];
+
+int flag = 0;
+MPI_Initialized(&flag);
+
+int nPE=Pstream::nProcs();
+int myPE=Pstream::myProcNo();
+
+if (flag)
+{
+   MPI_Barrier(MPI_COMM_WORLD);
+}
+
+if ( (!flag && nPE==1) || (nPE>1 && Pstream::master()) )
+{	
+		  char yc[1024] = "/yc_info.out";
+		  if (getcwd(cwd, sizeof(cwd)) != NULL)
+		  {
+			strcat(cwd,yc);
+		  }
+		  else
+		  {
+		       FatalError << "ERROR in ih2vofAlpha.H:\n" << " ERROR-1 "<< exit(FatalError);
+		  }
+
+		  char buf[1000];
+
+	 	  FILE * pFile;
+	  	  pFile = fopen (cwd,"r");
+	  	  if (pFile) 
+		  {
+	    		while (fgets(buf,1000, pFile)!=NULL)
+			{
+				nn++;
+			}
+	    		fclose(pFile);
+		  }
+		  else if(!pFile) 
+		  {
+	       		fclose(pFile);
+			FatalError << "ERROR in ih2vofAlpha.H:\n" << " ERROR-1 "<< exit(FatalError);
+		  }
+
+		  char yc2[1024] = "/heig";
+		  if (getcwd(cwd, sizeof(cwd)) != NULL)
+		  {
+			strcat(cwd,yc2);
+		  }
+		  else
+		  {
+		       perror("getcwd() error");
+		  }
+
+		  char buf3[1000];
+
+	 	  FILE * pFile2;
+	  	  pFile2 = fopen (cwd,"r");
+	  	  if (pFile2) 
+		  {
+	    		while (fgets(buf3,1000, pFile2)!=NULL)
+			{
+				nn3++;
+			}
+	    		fclose(pFile2);
+		  }
+		  else if(!pFile2) 
+		  {
+	       		fclose(pFile2);
+			FatalError << "ERROR in ih2vofAlpha.H:\n" << " ERROR-2 "<< exit(FatalError);
+		  }		
+}
+
+
+float *vYC;
+vYC = (float*)malloc(ycLength_*sizeof(float));
+float *theig;
+theig = (float*)malloc(heigLength_*sizeof(float));
+float *valheig;
+valheig = (float*)malloc(heigLength_*sizeof(float));
+
+if ( (!flag && nPE==1) || (nPE>1 && Pstream::master()) )
+{
+		  char yc[1024] = "/yc_info.out";
+		  if (getcwd(cwd, sizeof(cwd)) != NULL)
+		  {
+			strcat(cwd,yc);
+		  }
+		  else
+		  {
+		       FatalError << "ERROR in ih2vofAlpha.H:\n" << " ERROR-3 "<< exit(FatalError);
+		  }
+
+		  char buf2[1000];
+	 	  FILE * pFilee3;
+		  pFilee3 = fopen (cwd,"r");
+	  	  if (pFilee3) 
+		  {
+	    		while (fgets(buf2,1000, pFilee3)!=NULL)
+			{
+				vYC[nn2]=atof(buf2);
+				nn2++;
+			}
+	    		fclose(pFilee3);
+		  }
+		  else if(!pFilee3) 
+		  {
+	       		fclose(pFilee3);
+			FatalError << "ERROR in ih2vofAlpha.H:\n" << " ERROR-4 "<< exit(FatalError);
+		  }	           
+
+		  char yc2[1024] = "/heig";
+		  if (getcwd(cwd, sizeof(cwd)) != NULL)
+		  {
+			strcat(cwd,yc2);
+		  }
+		  else
+		  {
+		       FatalError << "ERROR in ih2vofAlpha.H:\n" << " ERROR-5 "<< exit(FatalError);
+		  }
+
+		  char buf4[1000];
+		  int aux1=0;
+	 	  FILE * pFilee4;
+		  pFilee4 = fopen (cwd,"r");
+		  char *pch;
+	  	  if (pFilee4) 
+		  {
+	    		while (fgets(buf4,1000, pFilee4)!=NULL)
+			{
+				pch = strtok (buf4," ");
+				aux1=0;  
+	  			while (pch != NULL)
+	  			{
+					aux1++;	  
+					if (aux1==1)
+					{
+						theig[nn4]=atof(pch); 
+					}
+					else if (aux1==2)
+					{
+						valheig[nn4]=atof(pch); 
+					}
+
+	    				pch = strtok (NULL, " ");  
+	  			}			
+				nn4++;
+			}
+	    		fclose(pFilee4);
+		  }
+		  else if(!pFilee4) 
+		  {
+	       		fclose(pFilee4);
+			FatalError << "ERROR in ih2vofAlpha.H:\n" << " ERROR-6 "<< exit(FatalError);
+		  }
+}
+	  
+label iii;
+
+float start_time = 0.0;
+float end_time = 0.0;
+float final_time = 0.0;
+if (flag)
+{
+	MPI_Barrier(MPI_COMM_WORLD);
+	start_time = MPI_Wtime();
+}
+
+int statuso;
+if (flag)
+{
+		  int ala=ycLength_;
+		  if (Pstream::master())
+		  {
+    			int i;
+    			for (i = 0; i < nPE; i++) 
+    			{
+      				if (i != myPE) 
+	      			{
+				        MPI_Send(vYC, ala, MPI_FLOAT, i, 0, MPI_COMM_WORLD);
+      				}
+    			}
+		  } 
+		  else 
+		  {
+    			MPI_Recv(vYC, ala, MPI_FLOAT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		  }
+		  //---------
+}
+
+for (iii=0;iii<ycLength_;iii++)
+{
+  	    vecYC[iii] = vYC[iii];
+}
+
+int statusoo;
+if (flag)
+{
+		  int ala=heigLength_;
+		  if (Pstream::master())
+		  {
+    			int i;
+    			for (i = 0; i < nPE; i++) 
+    			{
+      				if (i != myPE) 
+	      			{
+				        MPI_Send(theig, ala, MPI_FLOAT, i, 0, MPI_COMM_WORLD);
+      				}
+    			}
+		  } 
+		  else 
+		  {
+    			MPI_Recv(theig, ala, MPI_FLOAT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		  }
+}
+
+for (iii=0;iii<heigLength_;iii++)
+{
+	       vecT[iii] = theig[iii];
+}
+
+int statusooo;
+if (flag)
+{
+		  int ala=heigLength_;
+		  if (Pstream::master())
+		  {
+    			int i;
+    			for (i = 0; i < nPE; i++) 
+    			{
+      				if (i != myPE) 
+	      			{
+				        MPI_Send(valheig, ala, MPI_FLOAT, i, 0, MPI_COMM_WORLD);
+      				}
+    			}
+		  } 
+		  else 
+		  {
+    			MPI_Recv(valheig, ala, MPI_FLOAT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		  }
+}
+
+for (iii=0;iii<heigLength_;iii++)
+{
+	        vecH[iii] = valheig[iii];
+}
+
+if (flag)
+{
+	MPI_Barrier(MPI_COMM_WORLD);
+	end_time = MPI_Wtime();
+	final_time = end_time-start_time;
+}
+
+free (vYC);
+free (theig);
+free (valheig);

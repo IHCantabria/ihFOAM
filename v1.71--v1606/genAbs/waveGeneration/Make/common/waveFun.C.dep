@@ -1,0 +1,5 @@
+$(OBJECTS_DIR)/../common/waveFun.C.dep: \
+../common/waveFun.C \
+../common/waveFun.H \
+
+

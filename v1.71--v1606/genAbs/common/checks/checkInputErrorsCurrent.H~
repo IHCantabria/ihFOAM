@@ -1,0 +1,11 @@
+    if (nPaddles_ < 1)
+    {
+        FatalError << "Check nPaddles value." << exit(FatalError);
+    }
+
+    if ( nPaddles_ > 1 )
+    {
+        nPaddles_ = decreaseNPaddles( nPaddles_, patchD, dMin, dSpan );
+        reduce(nPaddles_, minOp<label>());
+    }
+

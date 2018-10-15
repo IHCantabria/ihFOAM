@@ -1,0 +1,3 @@
+ihFoamV2.C
+
+EXE = $(FOAM_APPBIN)/ihFoamV2.5

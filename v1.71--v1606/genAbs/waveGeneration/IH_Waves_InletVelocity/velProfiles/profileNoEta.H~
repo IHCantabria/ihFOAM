@@ -1,0 +1,56 @@
+    int mjo=0;
+
+    forAll( timeSeries_, contador1 )
+    {
+        if ( timeSeries_[contador1] = currTime )
+        {
+            indexF = contador1;
+	    mjo=1;
+            break;
+        }
+        else if ( timeSeries_[contador1] > currTime )
+        {
+            indexF = contador1;
+	    mjo=2;
+            break;
+        }
+
+    }
+
+    if ( indexF == 0)
+    {
+        UInterp = paddleVelocity_[0];
+    }
+    else
+    {
+////////////////        UInterp = interpolation (
+////////////////                		timeSeries_[indexF-1], 
+////////////////                		timeSeries_[indexF], 
+////////////////                		paddleVelocity_[indexF-1], 
+////////////////                		paddleVelocity_[indexF], 
+////////////////                		currTime
+////////////////
+////////////////            			);
+	if (mjo == 1)
+	{
+        	UInterp = paddleVelocity_[indexF];
+	}
+	else if (mjo == 2)
+	{
+	        UInterp = interpolatte (
+	                		timeSeries_[indexF-1], 
+	                		timeSeries_[indexF], 
+	                		paddleVelocity_[indexF-1], 
+	                		paddleVelocity_[indexF], 
+	                		currTime
+	            			);
+	}
+	else if (mjo == 0)
+	{
+		FatalError << " IH___info: Interpolation ERROR!! \n"<< exit(FatalError);
+	}
+    }
+
+    patchU[cellIndex] = UInterp*alphaCell[cellIndex];
+    patchV[cellIndex] = 0;
+    patchW[cellIndex] = 0; 

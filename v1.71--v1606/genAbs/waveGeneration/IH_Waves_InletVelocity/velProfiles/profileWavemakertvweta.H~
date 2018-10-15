@@ -1,0 +1,88 @@
+/*---------------------------------------------------------------------------*\
+   IH-Cantabria 2015 (http://www.ihcantabria.com/en/)
+   IHFOAM 2015 (http://ihfoam.ihcantabria.com/) 
+
+   Author(s):  Javier Lopez Lara (jav.lopez@unican.es)
+               Gabriel Barajas   (barajasg@unican.es)
+\*---------------------------------------------------------------------------*/
+
+Info << "   IH___Barajas: tvweta velocity profiler.... " << endl;
+
+		int mjo=0;
+		UInterp = 0.0;
+		WInterp = 0.0;
+	        int auxiliarG=0;
+
+		for( auxiliarG=0; auxiliarG<timeSeriess_.size()-1; auxiliarG++ )  
+		{
+			if ( timeSeriess_[auxiliarG] == currTime )
+			{
+			    indexF = auxiliarG;
+			    mjo=1;
+			    break;
+			}
+			else if ( timeSeriess_[auxiliarG] > currTime )
+			{
+			    indexF = auxiliarG;
+			    mjo=2;
+			    break;
+			}
+
+		}
+
+		if ( indexF == 0)
+		{
+			UInterp = paddleVelocityUU_[0];
+			WInterp = paddleVelocityWW_[0];
+		}
+		else
+		{
+			if (mjo == 1)
+			{
+				UInterp = paddleVelocityUU_[indexF];
+				WInterp = paddleVelocityWW_[indexF];
+			}
+			else if (mjo == 2)
+			{
+				UInterp = interpolatte(timeSeriess_[indexF-1], timeSeriess_[indexF], paddleVelocityUU_[indexF-1], paddleVelocityUU_[indexF], currTime);
+				WInterp = interpolatte(timeSeriess_[indexF-1], timeSeriess_[indexF], paddleVelocityWW_[indexF-1], paddleVelocityWW_[indexF], currTime);
+			}
+			else if (mjo == 0)
+			{
+				FatalError << " IH___info: Interpolation ERROR!! \n"<< exit(FatalError);
+			}
+    		}                
+
+
+		if (zSup[cellIndex] < calculatedLevel[cellGroup[cellIndex]-1])
+		//if (zSup[cellIndex] < heights[cellGroup[cellIndex]-1])
+                {
+                        patchU[cellIndex] = UInterp;
+            		patchV[cellIndex] = 0;
+
+            		//patchW[cellIndex] = 0;
+                        patchW[cellIndex] = WInterp;
+                } 
+		else if ( zInf[cellIndex] > calculatedLevel[cellGroup[cellIndex]-1])
+                {
+                        patchU[cellIndex] = 0.0;
+            		patchV[cellIndex] = 0.0;
+            		patchW[cellIndex] = 0.0;
+                }
+                else 
+                {	
+		        auxiliar = calculatedLevel[cellGroup[cellIndex]-1] - zInf[cellIndex];
+            	        auxiliarTotal = zSup[cellIndex]-zInf[cellIndex];
+            	        auxiliarTotal = auxiliar/auxiliarTotal;
+
+                        patchU[cellIndex] = UInterp;
+                        patchW[cellIndex] = WInterp;
+
+            		//patchU[cellIndex] = auxiliarTotal * patchU[cellIndex];
+            		patchU[cellIndex] = 0.0;
+
+            		patchV[cellIndex] = 0.0;
+
+            		//patchW[cellIndex] = auxiliarTotal * patchW[cellIndex];
+            		patchW[cellIndex] = 0.0;
+                }

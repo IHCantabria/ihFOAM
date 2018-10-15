@@ -1,0 +1,3 @@
+ihDyMFoam.C
+
+EXE = $(FOAM_APPBIN)/ihDyMFoam

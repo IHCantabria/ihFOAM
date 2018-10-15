@@ -1,0 +1,173 @@
+/*---------------------------------------------------------------------------*\
+   IH-Cantabria 2015 (http://www.ihcantabria.com/en/)
+   IHFOAM 2015 (http://ihfoam.ihcantabria.com/) 
+
+   Author(s):  Javier Lopez Lara (jav.lopez@unican.es)
+               Gabriel Barajas   (barajasg@unican.es)
+\*---------------------------------------------------------------------------*/  
+
+  if ( waveTheory_ == "tvweta" || waveTheory_ == "tveta" )
+    {
+	    int mjo=0;
+	    etaInterp=0.0;
+	    int auxiliarG=0;
+    
+	    if( currTime > max(timeSeriess_) )
+	    {
+		FatalError << "Time series is not long enough." << exit(FatalError);
+	    }
+	    else if( currTime < min(timeSeriess_) )
+	    {
+		FatalError << "First time should be <= startTime." << exit(FatalError);
+	    }
+
+	    for( auxiliarG=0; auxiliarG<timeSeriess_.size()-1; auxiliarG++ )  
+	    {
+
+		if ( timeSeriess_[auxiliarG] == currTime )
+		{
+		    indexF = auxiliarG;
+		    mjo=1;
+		    break;
+		}
+		else if ( timeSeriess_[auxiliarG] > currTime )
+		{
+		    indexF = auxiliarG;
+		    mjo=2;
+		    break;
+		}
+
+	    }
+
+	    if ( indexF == 0)
+	    {
+		etaInterp = paddleEtaa_[0];
+	    }
+	    else
+	    {
+		if (mjo == 1)
+		{
+			etaInterp = paddleEtaa_[indexF];
+		}
+		else if (mjo == 2)
+		{
+			etaInterp = interpolatte (timeSeriess_[indexF-1], timeSeriess_[indexF], paddleEtaa_[indexF-1], paddleEtaa_[indexF], currTime);
+		}
+		else if (mjo == 0)
+		{
+			FatalError << "IH__tveta: Interpolation ERROR!! \n"<< exit(FatalError);
+		}
+	    }
+
+	    Info << " WAVEMAKER_CLWM: etaInterp=" << etaInterp << " [currTime= " << currTime << "]" << endl;
+
+	    forAll(calculatedLevel, it5)
+	    {
+		calculatedLevel[it5] = RealwaterDepth_ + timeMult * etaInterp;
+	    }
+     }
+    else if ( waveTheory_ == "ih2vof" )
+    {
+	    #include "ih2vofAlpha.H"
+
+	    if ( tCurrent_ < 0)
+	    {
+		    label alo1=0;
+		    scalar valor=0.0;
+		    for (alo1=0;alo1<heigLength_;alo1++)
+		    {
+			if ( alo1==0 & vecT[alo1]>currTime )
+			{
+				Info << " Asigned[0]!!! t= " << currTime <<" [vecT("<< alo1 <<")= "<< vecT[alo1] <<"]" << endl;
+				valor=vecH[alo1];
+				break;
+			}
+			else if(vecT[alo1] == currTime)
+			{
+				Info << " Asigned[t]!!! t= " << currTime <<" [vecT("<< alo1 <<")= "<< vecT[alo1] <<"]" << endl;
+				valor=vecH[alo1];
+				break; 
+			}
+			else if ( alo1>0 & vecT[alo1]>currTime & vecT[alo1-1]<currTime )
+			{
+				Info << " Interpolated!!! t= " << currTime << " [vecT("<< alo1 <<")= "<< vecT[alo1] <<"] and [vecT("<< alo1-1 <<")= "<< vecT[alo1-1] <<"]" << endl;
+				valor=(vecH[alo1]+vecH[alo1-1])*0.5;
+				break;
+			}
+		    }
+
+		    //if (vecT[0] > currTime) 
+		    //{
+		    //	valor = RealwaterDepth_;
+		    //}
+	       
+		    //if (alo1==nn3-1)
+		    if (alo1==heigLength_-1)  
+		    {
+			valor = RealwaterDepth_;
+		    }
+
+		    forAll(calculatedLevel, itS1)
+		    {
+			calculatedLevel = valor;
+		    }
+
+//Info << " ih2vof: RealwaterDepth_= " << RealwaterDepth_ << endl;
+//Info << " ih2vof: currTime= " << currTime << endl;
+//Info << " ih2vof: alo1= " << alo1 << endl;
+
+		    Info << " ih2vof calculatedLevel= " << calculatedLevel << endl;
+	    }
+	    else if (tCurrent_ > 0 && currTime>=tCurrent_ )
+	    {
+		    label alo1=0;
+		    scalar valor=0.0;
+		    for (alo1=0;alo1<heigLength_;alo1++)
+		    { 
+			if ( alo1==0 & vecT[alo1]> (currTime-tCurrent_) )
+			{
+				Info << " Asigned[0][with currents] !!! t= " << currTime <<" [vecT("<< alo1 <<")= "<< vecT[alo1] <<"] ... tCurrent=" << tCurrent_ << endl;
+
+				valor=vecH[alo1];
+				break; 
+			
+			}
+			else if(vecT[alo1] == (currTime-tCurrent_) )
+			{
+				Info << " Asigned[t][with currents] !!! t= " << currTime <<" [vecT("<< alo1 <<")= "<< vecT[alo1] <<"] ... tCurrent=" << tCurrent_ << endl;
+
+				valor=vecH[alo1];
+				break; 
+			
+			}
+			else if ( alo1>0 & vecT[alo1]>(currTime-tCurrent_) & vecT[alo1-1]<(currTime-tCurrent_))
+			{
+				Info << " Interpolated [with currents] !!! t= " << currTime << " [vecT("<< alo1 <<")= "<< vecT[alo1] <<"] and [vecT("<< alo1-1 <<")= "<< vecT[alo1-1] <<"] ...tCurrent=" << tCurrent_ << endl;
+				valor=(vecH[alo1]+vecH[alo1-1])*0.5;
+				break;
+			}
+		    }
+
+		    //if (vecT[0] > (currTime-tCurrent_)) 
+		    //{
+		    //	valor = RealwaterDepth_;
+		    //}
+	       
+		    //if (alo1==nn3-1) 
+		    if (alo1==heigLength_-1)  
+		    {
+			valor = RealwaterDepth_;
+		    }
+
+		    forAll(calculatedLevel, itS1)
+		    {
+			calculatedLevel = valor;
+		    }
+
+		    Info << " ih2vof calculatedLevel= " << calculatedLevel << endl;
+	    }
+	    else if (tCurrent_ > 0 && tCurrent_>currTime )
+	    {
+		 Info << " Interpolated [with currents] not needed VoF YET !!! t= " << currTime <<" tCurrent=" << tCurrent_ << endl;
+	    }
+    }

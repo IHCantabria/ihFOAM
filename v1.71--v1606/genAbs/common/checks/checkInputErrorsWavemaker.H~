@@ -1,0 +1,121 @@
+/*---------------------------------------------------------------------------*\
+   IH-Cantabria 2015 (http://www.ihcantabria.com/en/)
+   IHFOAM 2015 (http://ihfoam.ihcantabria.com/) 
+
+   Author(s):  Javier Lopez Lara (jav.lopez@unican.es)
+               Gabriel Barajas   (barajasg@unican.es)
+\*---------------------------------------------------------------------------*/
+
+    timeSeriess_ = (IHWavesDict.lookupOrDefault("timeSeries", List<scalar> (1, -1.0) ));
+    paddlePositionn_ = (IHWavesDict.lookupOrDefault("paddlePosition", List<scalar> (1, -1.0)));
+    paddleVelocityUU_ = (IHWavesDict.lookupOrDefault("paddleVelocityU", List<scalar> (1, -1.0)));
+    paddleVelocityWW_ = (IHWavesDict.lookupOrDefault("paddleVelocityW", List<scalar> (1, -1.0)));
+    paddleEtaa_ = (IHWavesDict.lookupOrDefault("paddleEta", List<scalar> (1, -1.0)));
+
+    if (nPaddles_ < 1)
+    {
+        FatalError << "Check nPaddles value." << exit(FatalError);
+    }
+
+    if ( nPaddles_ > 1 )
+    {
+        nPaddles_ = decreaseNPaddles( nPaddles_, patchD, dMin, dSpan );
+        reduce(nPaddles_, minOp<label>());
+    }
+
+    if ( waveTheory_ == "aaa" )
+    {
+        FatalError << "Wave theory not specified for wavemaker, use:\n" << "tx, tv, txeta, tveta." << exit(FatalError);
+    }
+
+    if( waveTheory_ == "tx" )
+    {
+        if( timeSeriess_.size() != paddlePositionn_.size() || timeSeriess_.size() == 1 )
+        {
+            FatalError << "Check number of components of all time series" << " or waveTheory." << exit(FatalError);
+        }
+
+        paddleVelocityUU_ = 0.0*timeSeriess_;
+
+        for( auxiliar=0; auxiliar<timeSeriess_.size()-1; auxiliar++ )
+        {
+            paddleVelocityUU_[auxiliar] = (paddlePositionn_[auxiliar+1] - paddlePositionn_[auxiliar]) /(timeSeriess_[auxiliar+1] - timeSeriess_[auxiliar]);
+        }
+
+        paddleEtaa_ = paddlePositionn_ - paddlePositionn_[0];
+        
+        waveTheoryOrig_ = waveTheory_;
+        IHWavesDict.set("waveTheoryOrig", waveTheory_);
+        waveTheory_ = "tveta";
+        IHWavesDict.set("waveTheory", waveTheory_);
+        IHWavesDict.set("paddleVelocityU", paddleVelocityUU_);
+        IHWavesDict.set("paddleEta", paddleEtaa_);
+        IHWavesDict.Foam::regIOobject::write();
+    }
+    else if( waveTheory_ == "tv" )
+    {
+        if( timeSeriess_.size() != paddleVelocityUU_.size() || timeSeriess_.size() == 1 )
+        {
+            FatalError << "Check number of components of all time series" << " or waveTheory." << exit(FatalError);
+        }
+
+        paddleEtaa_ = 0.0*timeSeriess_;
+
+        for( auxiliar=1; auxiliar<timeSeriess_.size(); auxiliar++ )
+        {
+            paddleEtaa_[auxiliar] = paddleEtaa_[auxiliar-1] + paddleVelocityUU_[auxiliar-1]*(timeSeriess_[auxiliar] - timeSeriess_[auxiliar-1]);
+        }
+
+        waveTheoryOrig_ = waveTheory_;
+        IHWavesDict.set("waveTheoryOrig", waveTheory_);
+        waveTheory_ = "tveta";
+        IHWavesDict.set("waveTheory", waveTheory_);
+        IHWavesDict.set("paddleEta", paddleEtaa_);
+        IHWavesDict.Foam::regIOobject::write();
+    }
+    else if( waveTheory_ == "txeta" )
+    {
+        if( timeSeriess_.size() != paddlePositionn_.size() || timeSeriess_.size() != paddleEtaa_.size() || timeSeriess_.size() == 1 )
+        {
+            FatalError << "Check number of components of all time series" << " or waveTheory." << exit(FatalError);
+        }
+
+        paddleVelocityUU_ = 0.0*timeSeriess_;
+
+        for( auxiliar=0; auxiliar<timeSeriess_.size()-1; auxiliar++ )
+        {
+            paddleVelocityUU_[auxiliar] = (paddlePositionn_[auxiliar+1] - paddlePositionn_[auxiliar]) / (timeSeriess_[auxiliar+1] - timeSeriess_[auxiliar]);
+        }
+
+        waveTheoryOrig_ = waveTheory_;
+        IHWavesDict.set("waveTheoryOrig", waveTheory_);
+        waveTheory_ = "tveta";
+        IHWavesDict.set("waveTheory", waveTheory_);
+        IHWavesDict.set("paddleVelocityU", paddleVelocityUU_);
+        IHWavesDict.Foam::regIOobject::write();
+    }
+    else if( waveTheory_ == "tveta" )
+    {
+        if( timeSeriess_.size() != paddleVelocityUU_.size() || timeSeriess_.size() != paddleEtaa_.size() || timeSeriess_.size() == 1 )
+        {
+            FatalError << "Check number of components of all time series" << " or waveTheory." << exit(FatalError);
+        }
+        waveTheoryOrig_ = (IHWavesDict.lookupOrDefault<word>("waveTheoryOrig", "aaa"));
+    }
+    else if( waveTheory_ == "tvweta" )
+    {
+        if( timeSeriess_.size() != paddleVelocityUU_.size() || timeSeriess_.size() != paddleEtaa_.size() || timeSeriess_.size() == 1 )
+        {
+            FatalError << "Check number of components of all time series" << " or waveTheory." << exit(FatalError);
+        }
+        waveTheoryOrig_ = (IHWavesDict.lookupOrDefault<word>("waveTheoryOrig", "aaa"));
+
+	Info << "   IH___Barajas: tvweta OK!!! " << endl;
+    }
+    else if( waveTheory_ == "ih2vof" )
+    {
+    }
+    else
+    {
+        FatalError << "Wave theory not supported, use:\n" << "tx, txeta, txeta, tveta, tvweta " << exit(FatalError);
+    }

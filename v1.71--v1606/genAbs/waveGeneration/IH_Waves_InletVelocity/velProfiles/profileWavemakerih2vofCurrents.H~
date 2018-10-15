@@ -1,0 +1,399 @@
+/*---------------------------------------------------------------------------*\
+   IH-Cantabria 2015 (http://www.ihcantabria.com/en/)
+   IHFOAM 2015 (http://ihfoam.ihcantabria.com/) 
+
+   Author(s):  Javier Lopez Lara (jav.lopez@unican.es)
+               Gabriel Barajas   (barajasg@unican.es)
+\*---------------------------------------------------------------------------*/
+
+		UInterp = 0.0;
+		WInterp = 0.0;
+		UInterp2 = 0.0;
+		WInterp2 = 0.0;
+	        int auxiliarG=0;
+
+	        label alo1=0;
+	        label alo2=0;
+		scalar mjo=0;
+
+		scalar indiceG=0;
+		scalar indiceG2=0;
+		scalar indiceP=0;
+		scalar indiceP2=0;
+		scalar finall=0;
+
+	        for (alo1=0;alo1<heigLength_;alo1++) 
+	        {
+		   if ( tCurrent_ < 0)
+	    	   {
+			   if(vecT[alo1] == currTime)
+			   {
+				for (alo2=1;alo2<ycLength_;alo2++)
+				{
+					if(  (abs(vecYC[alo2]-zSup[cellIndex]) <= 1.0e-3 ) && (abs(vecYC[alo2-1]-zInf[cellIndex]) <= 1.0e-3) )
+					{
+						mjo=1;
+						break;
+					}
+					if(  (zSup[cellIndex] < vecYC[alo2]) && (zInf[cellIndex] > vecYC[alo2-1]) && ( zSup[cellIndex] > vecYC[alo2-1]) && ( zInf[cellIndex] < vecYC[alo2]) )
+					{
+						mjo=2;
+						break;
+					}
+					else if(  (zSup[cellIndex] > vecYC[alo2]) && (zInf[cellIndex] > vecYC[alo2-1]) && ( (vecYC[alo2])-zInf[cellIndex]>1.0e-3))
+					{
+						mjo=3;
+						break;
+					}
+					else if(  (zSup[cellIndex] < vecYC[alo2]) && (zInf[cellIndex] < vecYC[alo2-1]) && (zSup[cellIndex]-vecYC[alo2-1]>1.0e-3) )
+					{
+						mjo=4;
+						break;
+					}
+				}
+
+				if (mjo==1 || mjo==2)
+				{
+					indiceG=alo1*(ycLength_-1) + alo2;
+					UInterp=vecUX[indiceG];
+					WInterp=vecUY[indiceG];
+				}
+				else if (mjo==3)
+				{
+					indiceG=alo1*(ycLength_-1) + alo2;
+					indiceP=alo1*(ycLength_-1) + alo2 - 1;
+					UInterp=(vecUX[indiceG]+vecUX[indiceP])*0.5;
+					WInterp=(vecUY[indiceG]+vecUY[indiceP])*0.5;
+				}
+				else if (mjo==4)
+				{
+					indiceG=alo1*(ycLength_-1) + alo2;
+					indiceP=alo1*(ycLength_-1) + alo2 + 1;
+					UInterp=(vecUX[indiceG]+vecUX[indiceP])*0.5;
+					WInterp=(vecUY[indiceG]+vecUY[indiceP])*0.5;
+				}
+				else if( mjo==0 || alo2==ycLength_-1 )
+				{
+					UInterp=0.0;
+					WInterp=0.0;
+				}
+				else if( mjo==0 || alo2!=ycLength_-1 )
+				{
+					Info << " zSup[" << cellIndex << "]= " << zSup[cellIndex] << " zInf[" << cellIndex << "]= " << zInf[cellIndex] << endl;
+					Info << " alo2= " << alo2 << " mjo= " << mjo << endl;
+					FatalError << " IH___info: ERROR in profileWaveMaker.h:\n" << " ERROR-2 "<< exit(FatalError);
+				}
+
+				break;
+			
+			   }
+			   else if ( vecT[alo1]>currTime && vecT[alo1-1]<currTime & alo1>0 )
+			   {
+				for (alo2=1;alo2<ycLength_;alo2++)
+				{
+					if(  (abs(vecYC[alo2]-zSup[cellIndex]) <= 1.0e-3 ) && (abs(vecYC[alo2-1]-zInf[cellIndex]) <= 1.0e-3) )
+					{
+						mjo=1;
+						break;
+					}
+					if(  (zSup[cellIndex] < vecYC[alo2]) && (zInf[cellIndex] > vecYC[alo2-1]) && ( zSup[cellIndex] > vecYC[alo2-1]) && ( zInf[cellIndex] < vecYC[alo2]) )
+					{
+						mjo=2;
+						break;
+					}
+					else if(  (zSup[cellIndex] > vecYC[alo2]) && (zInf[cellIndex] > vecYC[alo2-1]) && ( (vecYC[alo2])-zInf[cellIndex]>1.0e-3))
+					{
+						mjo=3;
+						break;
+					}
+					else if(  (zSup[cellIndex] < vecYC[alo2]) && (zInf[cellIndex] < vecYC[alo2-1]) && (zSup[cellIndex]-vecYC[alo2-1]>1.0e-3) )
+					{
+						mjo=4;
+						break;
+					}
+				}
+
+				if (mjo==1 || mjo==2 )
+				{
+					indiceG=alo1*(ycLength_-1) + alo2;
+					UInterp=vecUX[indiceG];
+					WInterp=vecUY[indiceG];
+				}
+				else if (mjo==3)
+				{
+					indiceG=alo1*(ycLength_-1) + alo2;
+					indiceP=alo1*(ycLength_-1) + alo2 + 1;
+					UInterp=(vecUX[indiceG]+vecUX[indiceP])*0.5;
+					WInterp=(vecUY[indiceG]+vecUY[indiceP])*0.5;
+				}
+				else if (mjo==4)
+				{
+					indiceG=alo1*(ycLength_-1) + alo2;
+					indiceP=alo1*(ycLength_-1) + alo2 - 1;
+					UInterp=(vecUX[indiceG]+vecUX[indiceP])*0.5;
+					WInterp=(vecUY[indiceG]+vecUY[indiceP])*0.5;
+				}
+				else if( mjo==0 || alo2==ycLength_-1 )
+				{
+					UInterp=0.0;
+					WInterp=0.0;
+				}
+				else if( mjo==0 || alo2!=ycLength_-1 )
+				{
+					Info << " zSup[" << cellIndex << "]= " << zSup[cellIndex] << " zInf[" << cellIndex << "]= " << zInf[cellIndex] << endl;
+					Info << " alo2= " << alo2 << " mjo= " << mjo << endl;
+					FatalError << " IH___info: ERROR in profileWaveMaker.h:\n" << " ERROR-4 "<< exit(FatalError);
+				}
+
+				if (mjo==1|| mjo==2)
+				{
+					indiceG2=(alo1-1)*(ycLength_-1) + alo2;
+					UInterp2=vecUX[indiceG2];
+					WInterp2=vecUY[indiceG2];
+
+					UInterp=(UInterp+UInterp2)*0.5;
+					WInterp=(WInterp+WInterp2)*0.5;
+				}
+				else if (mjo==3)
+				{
+					indiceG2=(alo1-1)*(ycLength_-1) + alo2;
+					indiceP2=(alo1-1)*(ycLength_-1) + alo2 + 1;
+					UInterp2=(vecUX[indiceG2]+vecUX[indiceP2])*0.5;
+					WInterp2=(vecUY[indiceG2]+vecUY[indiceP2])*0.5;
+
+					UInterp=(UInterp+UInterp2)*0.5;
+					WInterp=(WInterp+WInterp2)*0.5;
+				}
+				else if (mjo==4)
+				{
+					indiceG2=(alo1-1)*(ycLength_-1) + alo2;
+					indiceP2=(alo1-1)*(ycLength_-1) + alo2 - 1;
+					UInterp2=(vecUX[indiceG2]+vecUX[indiceP2])*0.5;
+					WInterp2=(vecUY[indiceG2]+vecUY[indiceP2])*0.5;
+
+					UInterp=(UInterp+UInterp2)*0.5;
+					WInterp=(WInterp+WInterp2)*0.5;
+				}
+				else if( mjo==0 || alo2==ycLength_-1 )
+				{
+					UInterp=0.0;
+					WInterp=0.0;
+				}
+				else if( mjo==0 || alo2!=ycLength_-1 )
+				{
+					FatalError << " IH___info: ERROR in profileWaveMaker.h:\n" << " ERROR-5 "<< exit(FatalError);
+				}
+
+				break;
+			   }
+		   }
+		   else if( tCurrent_ > 0 && currTime>=tCurrent_)
+		   {
+			   if(vecT[alo1] == (currTime-tCurrent_))
+			   {
+				for (alo2=1;alo2<ycLength_;alo2++)
+				{
+					if(  (abs(vecYC[alo2]-zSup[cellIndex]) <= 1.0e-3 ) && (abs(vecYC[alo2-1]-zInf[cellIndex]) <= 1.0e-3) )
+					{
+						mjo=1;
+						break;
+					}
+					if(  (zSup[cellIndex] < vecYC[alo2]) && (zInf[cellIndex] > vecYC[alo2-1]) && ( zSup[cellIndex] > vecYC[alo2-1]) && ( zInf[cellIndex] < vecYC[alo2]) )
+					{
+						mjo=2;
+						break;
+					}
+					else if(  (zSup[cellIndex] > vecYC[alo2]) && (zInf[cellIndex] > vecYC[alo2-1]) && ( (vecYC[alo2])-zInf[cellIndex]>1.0e-3))
+					{
+						mjo=3;
+						break;
+					}
+					else if(  (zSup[cellIndex] < vecYC[alo2]) && (zInf[cellIndex] < vecYC[alo2-1]) && (zSup[cellIndex]-vecYC[alo2-1]>1.0e-3) )
+					{
+						mjo=4;
+						break;
+					}
+				}
+
+				if (mjo==1 || mjo==2)
+				{
+					indiceG=alo1*(ycLength_-1) + alo2;
+					UInterp=vecUX[indiceG];
+					WInterp=vecUY[indiceG];
+				}
+				else if (mjo==3)
+				{
+					indiceG=alo1*(ycLength_-1) + alo2;
+					indiceP=alo1*(ycLength_-1) + alo2 - 1;
+					UInterp=(vecUX[indiceG]+vecUX[indiceP])*0.5;
+					WInterp=(vecUY[indiceG]+vecUY[indiceP])*0.5;
+				}
+				else if (mjo==4)
+				{
+					indiceG=alo1*(ycLength_-1) + alo2;
+					indiceP=alo1*(ycLength_-1) + alo2 + 1;
+					UInterp=(vecUX[indiceG]+vecUX[indiceP])*0.5;
+					WInterp=(vecUY[indiceG]+vecUY[indiceP])*0.5;
+				}
+				else if( mjo==0 || alo2==ycLength_-1 )
+				{
+					UInterp=0.0;
+					WInterp=0.0;
+				}
+				else if( mjo==0 || alo2!=ycLength_-1 )
+				{
+					Info << " zSup[" << cellIndex << "]= " << zSup[cellIndex] << " zInf[" << cellIndex << "]= " << zInf[cellIndex] << endl;
+					Info << " alo2= " << alo2 << " mjo= " << mjo << endl;
+					FatalError << " IH___info: ERROR in profileWaveMaker.h:\n" << " ERROR-2 "<< exit(FatalError);
+				}
+
+				break;
+			
+			   }
+			   else if ( vecT[alo1]>(currTime-tCurrent_) && vecT[alo1-1]<(currTime-tCurrent_) & alo1>0 )
+			   {
+				for (alo2=1;alo2<ycLength_;alo2++)
+				{
+					if(  (abs(vecYC[alo2]-zSup[cellIndex]) <= 1.0e-3 ) && (abs(vecYC[alo2-1]-zInf[cellIndex]) <= 1.0e-3) )
+					{
+						mjo=1;
+						break;
+					}
+					if(  (zSup[cellIndex] < vecYC[alo2]) && (zInf[cellIndex] > vecYC[alo2-1]) && ( zSup[cellIndex] > vecYC[alo2-1]) && ( zInf[cellIndex] < vecYC[alo2]) )
+					{
+						mjo=2;
+						break;
+					}
+					else if(  (zSup[cellIndex] > vecYC[alo2]) && (zInf[cellIndex] > vecYC[alo2-1]) && ( (vecYC[alo2])-zInf[cellIndex]>1.0e-3))
+					{
+						mjo=3;
+						break;
+					}
+					else if(  (zSup[cellIndex] < vecYC[alo2]) && (zInf[cellIndex] < vecYC[alo2-1]) && (zSup[cellIndex]-vecYC[alo2-1]>1.0e-3) )
+					{
+						mjo=4;
+						break;
+					}
+				}
+
+				if (mjo==1 || mjo==2 )
+				{
+					indiceG=alo1*(ycLength_-1) + alo2;
+					UInterp=vecUX[indiceG];
+					WInterp=vecUY[indiceG];
+				}
+				else if (mjo==3)
+				{
+					indiceG=alo1*(ycLength_-1) + alo2;
+					indiceP=alo1*(ycLength_-1) + alo2 + 1;
+					UInterp=(vecUX[indiceG]+vecUX[indiceP])*0.5;
+					WInterp=(vecUY[indiceG]+vecUY[indiceP])*0.5;
+				}
+				else if (mjo==4)
+				{
+					indiceG=alo1*(ycLength_-1) + alo2;
+					indiceP=alo1*(ycLength_-1) + alo2 - 1;
+					UInterp=(vecUX[indiceG]+vecUX[indiceP])*0.5;
+					WInterp=(vecUY[indiceG]+vecUY[indiceP])*0.5;
+				}
+				else if( mjo==0 || alo2==ycLength_-1 )
+				{
+					UInterp=0.0;
+					WInterp=0.0;
+				}
+				else if( mjo==0 || alo2!=ycLength_-1 )
+				{
+					Info << " zSup[" << cellIndex << "]= " << zSup[cellIndex] << " zInf[" << cellIndex << "]= " << zInf[cellIndex] << endl;
+					Info << " alo2= " << alo2 << " mjo= " << mjo << endl;
+					FatalError << " IH___info: ERROR in profileWaveMaker.h:\n" << " ERROR-4 "<< exit(FatalError);
+				}
+
+				if (mjo==1|| mjo==2)
+				{
+					indiceG2=(alo1-1)*(ycLength_-1) + alo2;
+					UInterp2=vecUX[indiceG2];
+					WInterp2=vecUY[indiceG2];
+
+					UInterp=(UInterp+UInterp2)*0.5;
+					WInterp=(WInterp+WInterp2)*0.5;
+				}
+				else if (mjo==3)
+				{
+					indiceG2=(alo1-1)*(ycLength_-1) + alo2;
+					indiceP2=(alo1-1)*(ycLength_-1) + alo2 + 1;
+					UInterp2=(vecUX[indiceG2]+vecUX[indiceP2])*0.5;
+					WInterp2=(vecUY[indiceG2]+vecUY[indiceP2])*0.5;
+
+					UInterp=(UInterp+UInterp2)*0.5;
+					WInterp=(WInterp+WInterp2)*0.5;
+				}
+				else if (mjo==4)
+				{
+					indiceG2=(alo1-1)*(ycLength_-1) + alo2;
+					indiceP2=(alo1-1)*(ycLength_-1) + alo2 - 1;
+					UInterp2=(vecUX[indiceG2]+vecUX[indiceP2])*0.5;
+					WInterp2=(vecUY[indiceG2]+vecUY[indiceP2])*0.5;
+
+					UInterp=(UInterp+UInterp2)*0.5;
+					WInterp=(WInterp+WInterp2)*0.5;
+				}
+				else if( mjo==0 || alo2==ycLength_-1 )
+				{
+					UInterp=0.0;
+					WInterp=0.0;
+				}
+				else if( mjo==0 || alo2!=ycLength_-1 )
+				{
+					FatalError << " IH___info: ERROR in profileWaveMaker.h:\n" << " ERROR-5 "<< exit(FatalError);
+				}
+
+				break;
+			   }
+		   }
+	    	   else if (tCurrent_ > 0 && tCurrent_>currTime )
+	    	   {
+		 	Info << " Interpolated [with currents] not needed Velocity(s) YET !!! t= " << currTime <<" tCurrent=" << tCurrent_ << endl;
+			UInterp=0.0;
+		   	WInterp=0.0;
+	    	   }
+	        }
+
+///
+                if (vecT[0] > currTime)
+	        {
+		   UInterp=0.0;
+		   WInterp=0.0;
+	        }
+		
+                if (alo1==heigLength_-1) 
+	        {
+		   UInterp=0.0;
+		   WInterp=0.0;
+	        }
+
+		if (zSup[cellIndex] < calculatedLevel[cellGroup[cellIndex]-1])
+                {
+                        patchU[cellIndex] = UInterp*timeMult + uCurrent_;
+            		patchV[cellIndex] = 0;
+                        patchW[cellIndex] = WInterp*timeMult;
+                } 
+		else if ( zInf[cellIndex] > calculatedLevel[cellGroup[cellIndex]-1])
+                {
+                        patchU[cellIndex] = 0.0;
+            		patchV[cellIndex] = 0.0;
+            		patchW[cellIndex] = 0.0;
+                }
+                else 
+                {	
+		        auxiliar = calculatedLevel[cellGroup[cellIndex]-1] - zInf[cellIndex];
+            	        auxiliarTotal = zSup[cellIndex]-zInf[cellIndex];
+			auxiliarTotal = auxiliar/auxiliarTotal;		
+
+                        patchU[cellIndex] = UInterp;
+                        patchW[cellIndex] = WInterp;
+
+            		patchU[cellIndex] = auxiliarTotal * patchU[cellIndex] * timeMult +uCurrent_;
+            		patchV[cellIndex] = 0.0;
+            		patchW[cellIndex] = auxiliarTotal * patchW[cellIndex] * timeMult;
+                }
+

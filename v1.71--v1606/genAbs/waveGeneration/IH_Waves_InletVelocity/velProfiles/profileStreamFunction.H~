@@ -1,0 +1,219 @@
+/*---------------------------------------------------------------------------*\
+   IH-Cantabria 2015 (http://www.ihcantabria.com/en/)
+   IHFOAM 2015 (http://ihfoam.ihcantabria.com/) 
+
+   Author(s):  Javier Lopez Lara (jav.lopez@unican.es)
+               Gabriel Barajas   (barajasg@unican.es)
+\*---------------------------------------------------------------------------*/
+
+		if (zSup[cellIndex] < heights[cellGroup[cellIndex]-1])
+                {
+//                        patchU[cellIndex] = StokesIFun :: U (
+//                    					    waveHeight_, 
+//                    					    RealwaterDepth_, 
+//                    					    waveKx, 
+//                    					    xGroup[cellGroup[cellIndex]-1], 
+//                    					    waveKy, 
+//                    					    yGroup[cellGroup[cellIndex]-1], 
+//                    					    waveOmega, 
+//                    					    currTime, 
+//                    					    wavePhase_, 
+//                    					    patchHeight[cellIndex]
+//                					    );
+
+//            		patchV[cellIndex] = patchU[cellIndex] * sin(waveAngle)*timeMult;
+//           		patchU[cellIndex] = patchU[cellIndex] * cos(waveAngle)*timeMult;
+
+//            		patchW[cellIndex] = StokesIFun :: W (
+//                    					    waveHeight_, 
+//                    					    RealwaterDepth_, 
+//                    					    waveKx, 
+//                    					    xGroup[cellGroup[cellIndex]-1], 
+//                    					    waveKy, 
+//                    					    yGroup[cellGroup[cellIndex]-1], 
+//                    					    waveOmega, 
+//                    					    currTime, 
+//                    					    wavePhase_, 
+//                    					    patchHeight[cellIndex]
+//                					    );
+
+//			patchW[cellIndex] = patchW[cellIndex]*timeMult;
+
+			    patchU[cellIndex] = 0;
+			    patchW[cellIndex] = 0;
+			    patchV[cellIndex] = 0;
+
+			    forAll(Bjs_, iterSF2)
+			    {
+				patchU[cellIndex] += (iterSF2 + 1)*Bjs_[iterSF2]
+				    *cosh((iterSF2 + 1)*waveK*patchHeight[cellIndex]) 
+				    /cosh((iterSF2 + 1)*waveK*RealwaterDepth_)
+				    *cos((iterSF2 + 1)*faseTot);
+				patchW[cellIndex] += (iterSF2 + 1)*Bjs_[iterSF2]
+				    *sinh((iterSF2 + 1)*waveK*patchHeight[cellIndex]) 
+				    /cosh((iterSF2 + 1)*waveK*RealwaterDepth_)
+				    *sin((iterSF2 + 1)*faseTot);
+			    }
+
+			    patchU[cellIndex] = celerity - uMean_ 
+				+ sqrt(g*RealwaterDepth_)*waveK*RealwaterDepth_*patchU[cellIndex];
+
+			    patchV[cellIndex] = patchU[cellIndex]*sin(waveAngle);
+			    patchU[cellIndex] = patchU[cellIndex]*cos(waveAngle);
+
+			    patchW[cellIndex] = sqrt(g*RealwaterDepth_)*waveK*RealwaterDepth_*patchW[cellIndex]; 
+
+            		    patchV[cellIndex] = patchV[cellIndex]*timeMult;
+           		    patchU[cellIndex] = patchU[cellIndex]*timeMult;
+			    patchW[cellIndex] = patchW[cellIndex]*timeMult;
+
+                }
+		else if ( zInf[cellIndex] > calculatedLevel[cellGroup[cellIndex]-1])
+                {
+                        patchU[cellIndex] = 0.0;
+            		patchV[cellIndex] = 0.0;
+            		patchW[cellIndex] = 0.0;
+                } 
+                else 
+                {	
+			if ( calculatedLevel[cellGroup[cellIndex]-1] > measuredLevels[cellGroup[cellIndex]-1] )
+			{
+					if (zSup[cellIndex] < calculatedLevel[cellGroup[cellIndex]-1])
+					{
+//				        	patchU[cellIndex] = StokesIFun :: U (
+//				    					    waveHeight_, 
+//				    					    RealwaterDepth_, 
+//				    					    waveKx, 
+//				    					    xGroup[cellGroup[cellIndex]-1], 
+//				    					    waveKy, 
+//				    					    yGroup[cellGroup[cellIndex]-1], 
+//				    					    waveOmega, 
+//				    					    currTime, 
+//				    					    wavePhase_, 
+//				    					    measuredLevels[cellGroup[cellIndex]-1]
+//									    );
+
+//			    			patchV[cellIndex] = patchU[cellIndex] * sin(waveAngle)*timeMult;
+//			    			patchU[cellIndex] = patchU[cellIndex] * cos(waveAngle)*timeMult;
+
+//			    			patchW[cellIndex] = StokesIFun :: W (
+//				    					    waveHeight_, 
+//				    					    RealwaterDepth_, 
+//				    					    waveKx, 
+//				    					    xGroup[cellGroup[cellIndex]-1], 
+//				    					    waveKy, 
+//				    					    yGroup[cellGroup[cellIndex]-1], 
+//				    					    waveOmega, 
+//				    					    currTime, 
+//				    					    wavePhase_, 
+//				    					    measuredLevels[cellGroup[cellIndex]-1]
+//									    );
+
+//						patchW[cellIndex] = patchW[cellIndex]*timeMult;	
+
+					    patchU[cellIndex] = 0;
+					    patchW[cellIndex] = 0;
+					    patchV[cellIndex] = 0;
+
+					    forAll(Bjs_, iterSF2)
+					    {
+						patchU[cellIndex] += (iterSF2 + 1)*Bjs_[iterSF2]
+						    *cosh((iterSF2 + 1)*waveK*measuredLevels[cellGroup[cellIndex]-1]) 
+						    /cosh((iterSF2 + 1)*waveK*RealwaterDepth_)
+						    *cos((iterSF2 + 1)*faseTot);
+						patchW[cellIndex] += (iterSF2 + 1)*Bjs_[iterSF2]
+						    *sinh((iterSF2 + 1)*waveK*measuredLevels[cellGroup[cellIndex]-1]) 
+						    /cosh((iterSF2 + 1)*waveK*RealwaterDepth_)
+						    *sin((iterSF2 + 1)*faseTot);
+					    }
+
+					    patchU[cellIndex] = celerity - uMean_ 
+						+ sqrt(g*RealwaterDepth_)*waveK*RealwaterDepth_*patchU[cellIndex];
+
+					    patchV[cellIndex] = patchU[cellIndex]*sin(waveAngle);
+					    patchU[cellIndex] = patchU[cellIndex]*cos(waveAngle);
+
+					    patchW[cellIndex] = sqrt(g*RealwaterDepth_)*waveK*RealwaterDepth_*patchW[cellIndex]; 
+
+			    		    patchV[cellIndex] = patchV[cellIndex]*timeMult;
+			   		    patchU[cellIndex] = patchU[cellIndex]*timeMult;
+					    patchW[cellIndex] = patchW[cellIndex]*timeMult;
+		
+					}
+					else if ( (zSup[cellIndex] > calculatedLevel[cellGroup[cellIndex]-1]) & (zInf[cellIndex] < calculatedLevel[cellGroup[cellIndex]-1]) )
+					{
+//						auxiliar = calculatedLevel[cellGroup[cellIndex]-1] - zInf[cellIndex];
+//				    	        auxiliarTotal = zSup[cellIndex]-zInf[cellIndex];
+//				    	        auxiliarTotal = auxiliar/auxiliarTotal;
+
+//						patchU[cellIndex] = StokesIFun :: U (
+//					    					    waveHeight_, 
+//					    					    RealwaterDepth_, 
+//					    					    waveKx, 
+//					    					    xGroup[cellGroup[cellIndex]-1], 
+//					    					    waveKy, 
+//					    					    yGroup[cellGroup[cellIndex]-1], 
+//					    					    waveOmega, 
+//					    					    currTime, 
+//					    					    wavePhase_, 
+//					    					    measuredLevels[cellGroup[cellIndex]-1]
+//										    );
+
+//				    		patchV[cellIndex] = auxiliarTotal * patchU[cellIndex] * sin(waveAngle)*timeMult;
+//				    		patchU[cellIndex] = auxiliarTotal * patchU[cellIndex] * cos(waveAngle)*timeMult;
+
+//				    		patchW[cellIndex] = StokesIFun :: W (
+//					    					    waveHeight_, 
+//					    					    RealwaterDepth_, 
+//					    					    waveKx, 
+//					    					    xGroup[cellGroup[cellIndex]-1], 
+//					    					    waveKy, 
+//					    					    yGroup[cellGroup[cellIndex]-1], 
+//					    					    waveOmega, 
+//					    					    currTime, 
+//					    					    wavePhase_, 
+//					    					    measuredLevels[cellGroup[cellIndex]-1]
+//										    );
+
+//						patchW[cellIndex] = auxiliarTotal * patchW[cellIndex]*timeMult;
+
+					    //auxiliar = heights[cellGroup[cellIndex]-1] - zInf[cellIndex];
+					    //auxiliarTotal = zSup[cellIndex]-zInf[cellIndex];
+					    //auxiliarTotal = auxiliar/auxiliarTotal; 
+					    auxiliar = calculatedLevel[cellGroup[cellIndex]-1] - zInf[cellIndex];
+				    	    auxiliarTotal = zSup[cellIndex]-zInf[cellIndex];
+				    	    auxiliarTotal = auxiliar/auxiliarTotal;
+
+					    // Height corresponding to the partial cell
+					    //auxiliar = zInf[cellIndex] + auxiliar/scalar(2);
+
+					    patchU[cellIndex] = 0;
+					    patchW[cellIndex] = 0;
+
+					    forAll(Bjs_, iterSF3)
+					    {
+						patchU[cellIndex] += (iterSF3 + 1)*Bjs_[iterSF3]
+						    *cosh((iterSF3 + 1)*waveK*auxiliarTotal)
+						    /cosh((iterSF3 + 1)*waveK*RealwaterDepth_)
+						    *cos((iterSF3 + 1)*faseTot);
+						patchW[cellIndex] += (iterSF3 + 1)*Bjs_[iterSF3]
+						    *sinh((iterSF3 + 1)*waveK*auxiliarTotal)
+						    /cosh((iterSF3 + 1)*waveK*RealwaterDepth_)
+						    *sin((iterSF3 + 1)*faseTot);
+					    }
+
+					    patchU[cellIndex] = celerity - uMean_ 
+						+ sqrt(g*RealwaterDepth_)*waveK*RealwaterDepth_*patchU[cellIndex];
+
+					    patchV[cellIndex] = patchU[cellIndex]*sin(waveAngle);
+					    patchU[cellIndex] = patchU[cellIndex]*cos(waveAngle);
+
+					    patchW[cellIndex] = 
+						sqrt(g*RealwaterDepth_)*waveK*RealwaterDepth_*patchW[cellIndex];  	
+
+			    		    patchV[cellIndex] = patchV[cellIndex]*timeMult;
+			   		    patchU[cellIndex] = patchU[cellIndex]*timeMult;
+					    patchW[cellIndex] = patchW[cellIndex]*timeMult;
+					}
+			}	
+                }

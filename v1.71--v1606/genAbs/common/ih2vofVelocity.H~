@@ -1,0 +1,283 @@
+#include "mpi.h"
+
+#include <stdio.h>
+#include <unistd.h>
+#include <errno.h>
+#include "SquareMatrix.H"
+#include "vector.H"
+#include "Matrix.H"
+
+int aog=heigLength_*(ycLength_-1);
+float *vecUXaux;
+vecUXaux = (float*)malloc(aog*sizeof(float)); 
+
+char cwd[1024];
+
+int flag = 0;
+MPI_Initialized(&flag);
+
+int nPE=Pstream::nProcs();
+int myPE=Pstream::myProcNo();
+
+if (flag)
+{
+   MPI_Barrier(MPI_COMM_WORLD);
+}
+
+if ( (!flag && nPE==1) || (nPE>1 && Pstream::master()) )
+{
+		  char yc3[1024] = "/xu";
+		  if (getcwd(cwd, sizeof(cwd)) != NULL)
+		  {
+			strcat(cwd,yc3);
+		  }
+		  else
+		  {
+		       FatalError << "ERROR in ih2vofVelocity.H:\n" << " ERROR-1 "<< exit(FatalError);
+		  }
+
+		  char buf5[10000];
+		  label nn5=0;
+	 	  FILE * pFile5;
+	  	  pFile5 = fopen (cwd,"r");
+	  	  if (pFile5) 
+		  {
+	    		while (fgets(buf5,10000, pFile5)!=NULL)
+			{
+				nn5++;
+			}
+	    		fclose(pFile5);
+		  }
+		  else if(!pFile5) 
+		  {
+	       		fclose(pFile5);
+			FatalError << "ERROR in ih2vofVelocity.H:\n" << " ERROR-2 "<< exit(FatalError);
+		  }
+
+		  label nnreal=ycLength_-1;
+		  label ii;
+		  double **matUx;	
+		  matUx = (double **)malloc(nn5*sizeof(double*)); 
+		  for (ii=0;ii<nn5;ii++) 
+		  {
+			matUx[ii] = (double*)malloc(nnreal*sizeof(double));
+		  }
+
+		  char buf6[10000];
+		  label nn6=0;
+		  label aux2=0;
+	 	  FILE * pFile6;
+		  pFile6 = fopen (cwd,"r");
+		  char *pch2;
+	  	  if (pFile6) 
+		  {
+	    		while (fgets(buf6,10000, pFile6)!=NULL)
+			{
+				pch2 = strtok (buf6," ");
+				aux2=0;  
+	  			while (pch2 != NULL)
+	  			{
+	     				matUx[nn6][aux2]=atof(pch2);
+	    				pch2 = strtok (NULL, " ");  
+					aux2++;
+	  			}			
+				nn6++;
+			}
+	    		fclose(pFile6);
+		  }
+		  else if(!pFile6) 
+		  {
+	       		fclose(pFile6);
+			FatalError << "ERROR in ih2vofVelocity.H:\n" << " ERROR-3 "<< exit(FatalError);
+		  }
+
+		  label iii;
+		  label iiii;
+		  label auxGBO=0;
+
+		  for (iii=0;iii<heigLength_;iii++)
+	 	  {	
+		     for (iiii=0;iiii<(ycLength_-1);iiii++)
+	 	     {			
+			vecUXaux[auxGBO]=matUx[iii][iiii];
+			auxGBO++;
+		     }
+		  }
+
+		  for (ii=0;ii<nn5;ii++) 
+		  {
+			free (matUx[ii]);
+		  }
+		  free (matUx);
+}
+
+int status;
+if (flag)
+{
+	double start_time = 0.0;
+	double end_time = 0.0;
+	double final_time = 0.0;
+
+	MPI_Barrier(MPI_COMM_WORLD);
+
+	start_time = MPI_Wtime();
+
+	int ala= heigLength_*(ycLength_-1);
+
+	if (Pstream::master())
+	{
+	    int i;
+	    for (i = 0; i < nPE; i++) 
+	    {
+	      if (i != myPE) 
+	      {
+		MPI_Send(vecUXaux, ala, MPI_FLOAT, i, 0, MPI_COMM_WORLD);
+	      }
+	    }
+	} 
+	else 
+	{
+	    MPI_Recv(vecUXaux, ala, MPI_FLOAT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+	}
+
+	MPI_Barrier(MPI_COMM_WORLD);
+	end_time = MPI_Wtime();
+	final_time = end_time-start_time;
+}
+
+label gg;
+label auxGBO2=0;
+for (gg=0;gg<aog;gg++)
+{				
+		vecUX[auxGBO2]=vecUXaux[gg];
+		auxGBO2++;
+}
+
+float *vecUYaux;
+vecUYaux = (float*)malloc(aog*sizeof(float)); 
+
+if ( (!flag && nPE==1) || (nPE>1 && Pstream::master()) )
+{		
+		  char yc4[1024] = "/xv";
+		  if (getcwd(cwd, sizeof(cwd)) != NULL)
+		  {
+			strcat(cwd,yc4);
+		  }
+		  else
+		  {
+		       FatalError << "ERROR in ih2vofVelocity.H:\n" << " ERROR-4 "<< exit(FatalError);
+		  }
+
+		  char buf7[10000];
+		  label nn7=0;
+	 	  FILE * pFile7;
+	  	  pFile7 = fopen (cwd,"r");
+	  	  if (pFile7) 
+		  {
+	    		while (fgets(buf7,10000, pFile7)!=NULL)
+			{
+				nn7++;
+			}
+	    		fclose(pFile7);
+		  }
+		  else if(!pFile7) 
+		  {
+	       		fclose(pFile7);
+			FatalError << "ERROR in ih2vofVelocity.H:\n" << " ERROR-5 "<< exit(FatalError);
+		  }
+
+		  label nnreal=ycLength_-1;
+		  label ii;
+		  double **matVy;	
+		  matVy = (double **)malloc(nn7*sizeof(double*)); 
+		  for (ii=0;ii<nn7;ii++) 
+		  {
+			matVy[ii] = (double*)malloc(nnreal*sizeof(double));
+		  }
+
+		  char buf8[10000];
+		  label nn8=0;
+		  label aux3=0;
+	 	  FILE * pFile8;
+		  pFile8 = fopen (cwd,"r");
+		  char *pch3;
+	  	  if (pFile8) 
+		  {
+	    		while (fgets(buf8,10000, pFile8)!=NULL)
+			{
+				pch3 = strtok (buf8," ");
+				aux3=0;  
+	  			while (pch3 != NULL)
+	  			{
+	     				matVy[nn8][aux3]=atof(pch3);
+	    				pch3 = strtok (NULL, " ");  
+					aux3++;
+	  			}			
+				nn8++;
+			}
+	    		fclose(pFile8);
+		  }
+		  else if(!pFile8) 
+		  {
+	       		fclose(pFile8);
+			FatalError << "ERROR in ih2vofVelocity.H:\n" << " ERROR-6 "<< exit(FatalError);
+		  } 
+
+		  label iii;
+		  label iiii;
+		  label auxGBO=0;
+
+		  auxGBO=0;	
+		  for (iii=0;iii<heigLength_;iii++)
+	 	  {	
+		     for (iiii=0;iiii<(ycLength_-1);iiii++)
+	 	     {			
+			vecUYaux[auxGBO]=matVy[iii][iiii];
+			auxGBO++;
+		     }
+		  }
+
+		  for (ii=0;ii<nn7;ii++) 
+		  {
+			free (matVy[ii]);
+		  }
+		  free (matVy);
+
+}	
+
+if (flag)
+{
+	    	int statuso;
+		int ala=heigLength_*(ycLength_-1);
+		if (Pstream::master())
+		{
+    			int i;
+    			for (i = 0; i < nPE; i++) 
+    			{
+			      if (i != myPE) 
+      			      {
+        				MPI_Send(vecUYaux, ala, MPI_FLOAT, i, 0, MPI_COMM_WORLD);
+      			      }
+    			}
+		} 
+		else 
+		{
+    			MPI_Recv(vecUYaux, ala, MPI_FLOAT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		}
+}
+
+gg=0;
+auxGBO2=0;
+for (gg=0;gg<aog;gg++)
+{				
+		vecUY[auxGBO2]=vecUYaux[gg];
+		auxGBO2++;
+}
+
+if (flag)
+{
+	MPI_Barrier(MPI_COMM_WORLD);
+}
+
+free (vecUYaux);
+free (vecUXaux);

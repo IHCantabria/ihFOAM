@@ -1,0 +1,73 @@
+/*---------------------------------------------------------------------------*\
+   IH-Cantabria 2015 (http://www.ihcantabria.com/en/)
+   IHFOAM 2015 (http://ihfoam.ihcantabria.com/) 
+
+   Author(s):  Javier Lopez Lara (jav.lopez@unican.es)
+               Gabriel Barajas   (barajasg@unican.es)
+\*---------------------------------------------------------------------------*/
+
+    if ( waveType_ == "regular" )
+    {
+        if ( waveTheory_ == "StokesI" )
+        {
+            faseTot = waveKx*xGroup[cellGroup[cellIndex]-1] + waveKy*yGroup[cellGroup[cellIndex]-1] - waveOmega*currTime + wavePhase_;
+            #include "profileStokesICurrents.H"
+            #include "profileGENAB.H"
+        }
+        else if ( waveTheory_ == "StokesII" )
+        {
+            faseTot = waveKx*xGroup[cellGroup[cellIndex]-1] + waveKy*yGroup[cellGroup[cellIndex]-1] - waveOmega*currTime + wavePhase_;
+            #include "profileStokesIICurrents.H"
+            #include "profileGENAB.H"
+        }
+        else  if ( waveTheory_ == "StokesV" )
+        {
+            #include "profileStokesVCurrents.H"
+            #include "profileGENAB.H"
+        }
+        else if ( waveTheory_ == "Cnoidal" )
+        {
+            #include "profileCnoidalCurrents.H"
+            #include "profileGENAB.H"
+        }
+        else if ( waveTheory_ == "streamFunction" )
+        {
+            faseTot = waveKx*xGroup[cellGroup[cellIndex]-1] + waveKy*yGroup[cellGroup[cellIndex]-1] - waveOmega*currTime + wavePhase_;
+            #include "profileStreamFunctionCurrents.H"
+            #include "profileGENAB.H"
+        }
+    }
+    else if ( waveType_ == "solitary" )
+    {
+            #include "profileBoussinesqCurrents.H"
+            #include "profileGENAB.H"
+    }
+    else if ( waveType_ == "irregular" )
+    {
+            #include "profileIrregularCurrents.H"
+            #include "profileGENAB.H"
+    }
+    else if ( waveType_ == "wavemaker" )
+    {
+	//if ( waveTheory_ == "tveta" )
+        //{
+        //    #include "profileWavemakertvetaCurrents.H"
+	//    if ( genAbs_ )
+	//    {
+        //    	#include "profileGENAB.H"
+	//    }
+	//}
+	//else if ( waveTheory_ == "tvweta" )
+	//{
+        //    #include "profileWavemakertvwetaCurrents.H"
+	//    if ( genAbs_ )
+	//    {
+        //    	#include "profileGENAB.H"
+	//    }
+	//}
+	if ( waveTheory_ == "ih2vof" )
+	{
+            #include "profileWavemakerih2vofCurrents.H"
+            #include "profileGENAB.H"
+	}
+    }
